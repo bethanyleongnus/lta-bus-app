@@ -1,53 +1,51 @@
-/**
- * Vercel Serverless Function: api/health.js
- * Reports whether the key is configured (keyConfigured) and whether LTA answered,
- * including the upstream HTTP status code, for checking the service without opening the app.
- * It must never print the key or any part of it.
- */
-
 export default async function handler(req, res) {
   const accountKey = process.env.LTA_ACCOUNT_KEY;
+  const isConfigured = Boolean(accountKey && accountKey.trim() !== '');
 
   // BEFORE the fetch, if that variable is missing or empty, return 503
-  if (!accountKey || accountKey.trim() === '') {
+  if (!isConfigured) {
     return res.status(503).json({
       keyConfigured: false,
       ltaAnswered: false,
-      error: "LTA_ACCOUNT_KEY is not set. Add it in Vercel and redeploy."
+      error: 'LTA_ACCOUNT_KEY is not set. Add it in Vercel and redeploy.',
     });
   }
 
   try {
     const upstreamUrl = 'https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode=04121';
-    const upstreamRes = await fetch(upstreamUrl, {
+    const response = await fetch(upstreamUrl, {
       method: 'GET',
       headers: {
-        AccountKey: accountKey.trim()
-      }
+        AccountKey: accountKey,
+      },
     });
 
-    // AFTER the fetch, check response.ok before reading the body
-    if (!upstreamRes.ok) {
-      return res.status(upstreamRes.status).json({
+    // AFTER the fetch, check response.ok before reading the body.
+    // LTA returns an empty body on 401, so calling response.json() on a failed reply throws.
+    // On a non-2xx reply, return the upstream status and a one-line reason in your own JSON instead.
+    if (!response.ok) {
+      return res.status(response.status).json({
         keyConfigured: true,
         ltaAnswered: true,
-        upstreamStatus: upstreamRes.status,
-        error: `LTA DataMall upstream returned HTTP ${upstreamRes.status} ${upstreamRes.statusText || ''}`.trim()
+        statusCode: response.status,
+        upstreamStatus: response.status,
+        error: `LTA upstream returned status ${response.status}`,
       });
     }
 
     return res.status(200).json({
       keyConfigured: true,
       ltaAnswered: true,
-      upstreamStatus: upstreamRes.status,
-      message: 'LTA DataMall connection healthy'
+      statusCode: response.status,
+      upstreamStatus: response.status,
+      status: 'ok',
     });
-  } catch (err) {
+  } catch (error) {
     return res.status(502).json({
       keyConfigured: true,
       ltaAnswered: false,
-      upstreamStatus: null,
-      error: 'Failed to connect to LTA DataMall upstream: ' + (err instanceof Error ? err.message : String(err))
+      statusCode: 502,
+      error: 'Failed to contact LTA upstream service',
     });
   }
 }

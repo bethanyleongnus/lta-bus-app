@@ -1,6 +1,6 @@
 {
-  "name": "Live Bus Arrival Panel",
-  "description": "Live Singapore bus arrival panel powered by LTA DataMall API with automatic 20-second updates.",
+  "name": "Live Singapore Bus Arrivals",
+  "description": "Live bus arrival panel for Singapore bus stops powered by LTA DataMall v3 with real-time countdown and automated 20s refresh.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
