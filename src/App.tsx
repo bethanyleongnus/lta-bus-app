@@ -343,11 +343,11 @@ export default function App() {
                         <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                           Service {service.ServiceNo}
                         </div>
-                        {!hasBuses && (
-                          <div className="text-sm text-slate-400 mt-0.5">
-                            No buses running.
+                        {!hasBuses ? (
+                          <div className="text-sm text-slate-400 mt-1">
+                            No buses are currently running for this service.
                           </div>
-                        )}
+                        ) : null}
                       </div>
                     </div>
 
@@ -391,7 +391,7 @@ export default function App() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 italic">
+                        <span className="text-xs text-slate-400 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
                           No buses running
                         </span>
                       )}
